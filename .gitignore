@@ -1,0 +1,8 @@
+cmake-*
+.*
+!.github
+!.gitignore
+build
+vcpkg_installed
+imgui.ini
+
