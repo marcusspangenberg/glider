@@ -73,6 +73,7 @@ private:
 
     bool running_ = true;
     bool quitRequested_ = false;
+    bool showAboutDialog_ = false;
     FileBrowser fileBrowser_;
     std::string statusMessage_;
 

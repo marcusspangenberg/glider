@@ -1,6 +1,6 @@
 # Glider
 
-Glider is a rewrite of the classic Macintosh game [Glider 4](https://github.com/softdorothy/Glider4). The code is written from scratch in C++ trying to replicate the gameplay of the original. It uses the original artwork and sounds and it can read and write house files in the original format, so existing houses work out of the box.
+Glider is a rewrite of the classic Macintosh game [Glider 4](https://github.com/softdorothy/Glider4), originally designed by John Calhoun (softdorothy) and published by Casady & Greene Inc. The code is written from scratch in C++ trying to replicate the gameplay of the original. It uses the original artwork and sounds. The reimplemented game can read and write house files in the original format, so existing houses work out of the box.
 
 ## Installing
 
@@ -64,7 +64,7 @@ ImGui is fetched automatically by CMake via FetchContent — no extra steps need
 
 ## Copyright notice
 
-The original artwork, sounds, and house files are copyright © 2016 softdorothy and are used under the MIT License:
+The original game design, artwork, sounds, and house files are copyright © 2016 softdorothy and are used under the MIT License:
 
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 >

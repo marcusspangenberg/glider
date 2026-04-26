@@ -37,6 +37,7 @@ private:
     Preferences& prefs_;
     bool running_ = true;
     TitleScreenAction pendingAction_ {};
+    bool showAboutDialog_ = false;
     bool showPrefsDialog_ = false;
     bool prefsAirflow_ = false;
     SDL_Scancode prefsKeyLeft_ = SDL_SCANCODE_LEFT;
@@ -50,5 +51,6 @@ private:
 
     void processEvents();
     void drawUI();
+    void drawAboutDialog();
     void drawCatalog() const;
 };

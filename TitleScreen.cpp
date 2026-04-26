@@ -132,10 +132,20 @@ void TitleScreen::drawUI()
             }
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Help"))
+        {
+            if (ImGui::MenuItem("About..."))
+            {
+                showAboutDialog_ = true;
+            }
+            ImGui::EndMenu();
+        }
         ImGui::EndMainMenuBar();
     }
 
     fileBrowser_.draw();
+
+    drawAboutDialog();
 
     if (showPrefsDialog_)
     {
@@ -213,6 +223,37 @@ void TitleScreen::drawUI()
     ImGui::End();
 
     drawCatalog();
+}
+
+void TitleScreen::drawAboutDialog()
+{
+    if (showAboutDialog_)
+    {
+        ImGui::OpenPopup("About Glider");
+        showAboutDialog_ = false;
+    }
+    if (ImGui::BeginPopupModal("About Glider", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::TextUnformatted("Glider");
+        ImGui::Spacing();
+        ImGui::TextUnformatted("A reimplementation of Glider 4,");
+        ImGui::TextUnformatted("originally designed by John Calhoun (softdorothy).");
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        ImGui::TextUnformatted("Copyright (C) 2026 Marcus Spangenberg");
+        ImGui::TextUnformatted("Licensed under the GNU General Public License v3.");
+        ImGui::Spacing();
+        ImGui::TextUnformatted("Original game design, artwork, sounds, and house data:");
+        ImGui::TextUnformatted("Copyright (C) 2016 softdorothy (John Calhoun)");
+        ImGui::TextUnformatted("Licensed under the MIT License.");
+        ImGui::Spacing();
+        if (ImGui::Button("OK", ImVec2(120.0f, 0.0f)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
 }
 
 void TitleScreen::drawCatalog() const
