@@ -2,6 +2,8 @@
 
 Glider is a rewrite of the classic Macintosh game [Glider 4](https://github.com/softdorothy/Glider4), originally designed by John Calhoun. The code is written from scratch in C++ trying to replicate the gameplay of the original. It uses the original artwork and sounds. The reimplemented game can read and write house files in the original format, so existing houses work out of the box.
 
+![Gameplay](game.gif)
+
 ## Installing
 
 The GitHub releases contain pre-built artifacts for Ubuntu Linux, MacOS and Windows.
@@ -62,15 +64,6 @@ cmake --preset windows-release
 cmake --build --preset windows-release
 ```
 
-### Debug builds
-
-Replace `release` with `debug` in the preset name, e.g.:
-
-```sh
-cmake --preset linux-debug
-cmake --build --preset linux-debug
-```
-
 ## Editor
 
 A house editor is included and can be launched with:
@@ -79,7 +72,7 @@ A house editor is included and can be launched with:
 build/glidereditor
 ```
 
-ImGui is fetched automatically by CMake via FetchContent — no extra steps needed.
+![Editor](editor.gif)
 
 ## Copyright notice
 
