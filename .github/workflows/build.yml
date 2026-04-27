@@ -14,17 +14,19 @@ jobs:
         include:
           - os: ubuntu-24.04
             name: linux
-            extra-cmake: ""
+            preset: linux-release
           - os: windows-latest
             name: windows
-            extra-cmake: -DVCPKG_TARGET_TRIPLET=x64-windows-static -DVCPKG_APPLOCAL_DEPS=OFF
+            preset: windows-release
           - os: macos-latest
             name: macos
+            preset: macos-release
 
     runs-on: ${{ matrix.os }}
 
     env:
       VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg-binary-cache
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
 
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +42,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          key: vcpkg-${{ matrix.name }}-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-${{ matrix.name }}-${{ hashFiles('vcpkg.json') }}-${{ hashFiles('triplets/**') }}
           restore-keys: vcpkg-${{ matrix.name }}-
 
       - name: Create vcpkg binary cache dir
@@ -57,29 +59,19 @@ jobs:
 
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get install -y autoconf-archive libltdl-dev
-
-      - name: Configure (non-macOS)
-        if: runner.os != 'macOS'
-        run: >
-          cmake -B build
-          -DCMAKE_BUILD_TYPE=Release
-          "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
-          ${{ matrix.extra-cmake }}
-          .
-
-      - name: Configure (macOS)
-        if: runner.os == 'macOS'
         run: |
-          cmake -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
-            -DVCPKG_TARGET_TRIPLET=arm64-osx-static \
-            "-DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/triplets" \
-            .
+          sudo apt-get install -y autoconf-archive libltdl-dev \
+            libasound2-dev libpulse-dev \
+            libx11-dev libxext-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+            libwayland-dev wayland-protocols libxkbcommon-dev \
+            libgl-dev libegl-dev \
+            libdbus-1-dev libudev-dev
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
 
       - name: Build
-        run: cmake --build build --config Release
+        run: cmake --build --preset ${{ matrix.preset }}
 
       - name: Stage artifact (macOS)
         if: runner.os == 'macOS'
@@ -107,42 +99,6 @@ jobs:
           xcopy /E /I build\images artifact\images
           copy "build\The House" artifact\
           copy "build\The House 2" artifact\
-
-      - name: Sign and notarize (macOS)
-        if: runner.os == 'macOS'
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
-        run: |
-          if [ -z "$APPLE_CERTIFICATE" ]; then
-            echo "Skipping signing: APPLE_CERTIFICATE secret not set"
-            exit 0
-          fi
-          KEYCHAIN=$RUNNER_TEMP/signing.keychain-db
-          echo "$APPLE_CERTIFICATE" | base64 --decode > $RUNNER_TEMP/cert.p12
-          security create-keychain -p "temp" $KEYCHAIN
-          security set-keychain-settings -lut 21600 $KEYCHAIN
-          security unlock-keychain -p "temp" $KEYCHAIN
-          security import $RUNNER_TEMP/cert.p12 -P "$APPLE_CERTIFICATE_PASSWORD" \
-            -A -t cert -f pkcs12 -k $KEYCHAIN
-          security list-keychain -d user -s $KEYCHAIN
-          for APP in artifact/Glider.app artifact/GliderEditor.app; do
-            codesign --force --deep \
-              --sign "Developer ID Application: $APPLE_TEAM_ID" \
-              --entitlements macos/entitlements.plist \
-              --options runtime "$APP"
-          done
-          ditto -c -k --sequesterRsrc --keepParent \
-            artifact/Glider.app /tmp/notarize.zip
-          xcrun notarytool submit /tmp/notarize.zip \
-            --apple-id "$APPLE_ID" \
-            --password "$APPLE_APP_PASSWORD" \
-            --team-id "$APPLE_TEAM_ID" \
-            --wait
-          xcrun stapler staple artifact/Glider.app artifact/GliderEditor.app
 
       - name: Zip artifact (macOS)
         if: runner.os == 'macOS'

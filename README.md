@@ -1,6 +1,6 @@
 # Glider
 
-Glider is a rewrite of the classic Macintosh game [Glider 4](https://github.com/softdorothy/Glider4), originally designed by John Calhoun (softdorothy) and published by Casady & Greene Inc. The code is written from scratch in C++ trying to replicate the gameplay of the original. It uses the original artwork and sounds. The reimplemented game can read and write house files in the original format, so existing houses work out of the box.
+Glider is a rewrite of the classic Macintosh game [Glider 4](https://github.com/softdorothy/Glider4), originally designed by John Calhoun. The code is written from scratch in C++ trying to replicate the gameplay of the original. It uses the original artwork and sounds. The reimplemented game can read and write house files in the original format, so existing houses work out of the box.
 
 ## Installing
 
@@ -31,17 +31,26 @@ git clone https://github.com/microsoft/vcpkg "$env:USERPROFILE\vcpkg"
 $env:VCPKG_ROOT = "$env:USERPROFILE\vcpkg"
 ```
 
-### Linux / macOS
+CMake presets are provided for all platforms. Use the preset matching your OS:
+
+### Linux
 
 ```sh
-cmake -B build -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release .
-cmake --build build
+cmake --preset linux-release
+cmake --build --preset linux-release
 ```
 
-### macOS (Xcode)
+### macOS
 
 ```sh
-cmake -G Xcode -B build-xcode -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+cmake --preset macos-release
+cmake --build --preset macos-release
+```
+
+#### macOS (Xcode)
+
+```sh
+cmake --preset macos-xcode
 ```
 
 The Xcode scheme is pre-configured with the correct working directory so resources are found when running from Xcode.
@@ -49,7 +58,17 @@ The Xcode scheme is pre-configured with the correct working directory so resourc
 ### Windows
 
 ```powershell
-cmake -B build -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" .
+cmake --preset windows-release
+cmake --build --preset windows-release
+```
+
+### Debug builds
+
+Replace `release` with `debug` in the preset name, e.g.:
+
+```sh
+cmake --preset linux-debug
+cmake --build --preset linux-debug
 ```
 
 ## Editor
