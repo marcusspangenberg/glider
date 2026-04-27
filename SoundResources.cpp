@@ -46,6 +46,13 @@ const std::unordered_map<SoundResources::Sound, std::string_view> soundFiles = {
 
 SoundResources::SoundResources(std::string_view directoryName)
 {
+    int32_t frequency = 0;
+    uint16_t format = 0;
+    int32_t channels = 0;
+    if (Mix_QuerySpec(&frequency, &format, &channels) == 0)
+    {
+        return;
+    }
     for (const auto& [soundId, fileName] : soundFiles)
     {
         std::string path;

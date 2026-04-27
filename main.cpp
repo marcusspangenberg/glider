@@ -49,14 +49,24 @@ struct SdlAudio
 {
     SdlAudio()
     {
-        Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024);
+        if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0)
+        {
+            std::fprintf(stderr, "SdlAudio: Mix_OpenAudio failed: %s\n", Mix_GetError());
+            return;
+        }
         Mix_AllocateChannels(16);
+        opened_ = true;
     }
 
     ~SdlAudio()
     {
-        SDL_CloseAudio();
+        if (opened_)
+        {
+            Mix_CloseAudio();
+        }
     }
+
+    bool opened_ = false;
 };
 
 struct SdlImage
