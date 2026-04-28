@@ -744,20 +744,17 @@ void Editor::drawRoomListPanel(const float menuBarHeight, const float windowHeig
                 }
             }
 
-            if (ImGui::TreeNode("Tile Order"))
+            ImGui::Text("Tile Order:");
+            for (int32_t t = 0; t < 8; ++t)
             {
-                for (int32_t t = 0; t < 8; ++t)
+                char tileLabel[16];
+                snprintf(tileLabel, sizeof(tileLabel), "Tile %d", t);
+                auto tileValue = static_cast<int32_t>(room.tileOrder[t]);
+                if (ImGui::InputInt(tileLabel, &tileValue, 1, 10))
                 {
-                    char tileLabel[16];
-                    snprintf(tileLabel, sizeof(tileLabel), "Tile %d", t);
-                    auto tileValue = static_cast<int32_t>(room.tileOrder[t]);
-                    if (ImGui::InputInt(tileLabel, &tileValue, 1, 10))
-                    {
-                        room.tileOrder[t] = static_cast<uint16_t>(std::clamp(tileValue, 0, 7));
-                        dirty_ = true;
-                    }
+                    room.tileOrder[t] = static_cast<uint16_t>(std::clamp(tileValue, 0, 7));
+                    dirty_ = true;
                 }
-                ImGui::TreePop();
             }
 
             {
