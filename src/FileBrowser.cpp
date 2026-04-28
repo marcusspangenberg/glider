@@ -1,9 +1,20 @@
 #include "FileBrowser.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <imgui.h>
 #include <ranges>
 #include <string>
+
+std::filesystem::path FileBrowser::defaultStartDir()
+{
+    const char* home = std::getenv("HOME");
+    if (home && std::filesystem::is_directory(home))
+    {
+        return std::filesystem::path(home);
+    }
+    return std::filesystem::current_path();
+}
 
 void FileBrowser::openForOpen(const std::string& title, Callback onConfirm)
 {
@@ -14,7 +25,7 @@ void FileBrowser::openForOpen(const std::string& title, Callback onConfirm)
     selectedIndex_ = -1;
     errorMessage_.clear();
 
-    std::filesystem::path startDir = lastDir_.empty() ? std::filesystem::current_path() : lastDir_;
+    std::filesystem::path startDir = lastDir_.empty() ? defaultStartDir() : lastDir_;
     navigateTo(startDir);
     pendingOpen_ = true;
 }
@@ -39,7 +50,7 @@ void FileBrowser::openForSave(const std::string& title, const std::string& initi
     else
     {
         filenameBuf_[0] = '\0';
-        startDir = lastDir_.empty() ? std::filesystem::current_path() : lastDir_;
+        startDir = lastDir_.empty() ? defaultStartDir() : lastDir_;
     }
 
     navigateTo(startDir);

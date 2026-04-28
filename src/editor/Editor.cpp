@@ -697,7 +697,11 @@ void Editor::drawRoomListPanel(const float menuBarHeight, const float windowHeig
         {
             const auto& room = house_.theRooms[i];
             char label[64];
-            snprintf(label, sizeof(label), "[%u] %s", i + 1, room.roomName.empty() ? "(unnamed)" : room.roomName.c_str());
+            snprintf(label,
+                sizeof(label),
+                "[%u] %s",
+                i + 1,
+                room.roomName.empty() ? "(unnamed)" : room.roomName.c_str());
             const bool selected = (selectedRoomIndex_ == static_cast<size_t>(i));
             if (ImGui::Selectable(label, selected))
             {

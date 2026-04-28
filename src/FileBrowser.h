@@ -43,6 +43,7 @@ private:
     bool pendingOverwriteConfirm_ = false;
     std::filesystem::path pendingOverwritePath_;
 
+    static std::filesystem::path defaultStartDir();
     void navigateTo(const std::filesystem::path& dir);
     void refreshEntries();
     void drawContents();
