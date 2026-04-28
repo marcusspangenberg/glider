@@ -26,30 +26,30 @@ target_include_directories(imgui_lib PUBLIC
 target_link_libraries(imgui_lib PUBLIC SDL2::SDL2)
 
 add_executable(glider
-    main.cpp
-    HouseReader.h
-    HouseData.h
-    ObjectType.h
-    Resources.cpp
-    Resources.h
-    Colors.h
-    HouseReader.cpp
-    Renderer.cpp
-    Renderer.h
-    GameState.h
-    Constants.h
-    PlayerState.h
-    Rect.h
-    Game.cpp
-    Game.h
-    FileBrowser.cpp
-    FileBrowser.h
-    Preferences.cpp
-    Preferences.h
-    TitleScreen.cpp
-    TitleScreen.h
-    SoundResources.cpp
-    SoundResources.h
+    src/main.cpp
+    src/HouseReader.h
+    src/HouseData.h
+    src/ObjectType.h
+    src/Resources.cpp
+    src/Resources.h
+    src/Colors.h
+    src/HouseReader.cpp
+    src/Renderer.cpp
+    src/Renderer.h
+    src/GameState.h
+    src/Constants.h
+    src/PlayerState.h
+    src/Rect.h
+    src/Game.cpp
+    src/Game.h
+    src/FileBrowser.cpp
+    src/FileBrowser.h
+    src/Preferences.cpp
+    src/Preferences.h
+    src/TitleScreen.cpp
+    src/TitleScreen.h
+    src/SoundResources.cpp
+    src/SoundResources.h
 )
 target_link_libraries(glider PRIVATE
     $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
@@ -58,7 +58,7 @@ target_link_libraries(glider PRIVATE
     imgui_lib
 )
 if(NOT APPLE)
-    configure_file(fonts/glyphs_sans.png ${CMAKE_BINARY_DIR}/fonts/glyphs_sans.png COPYONLY)
+    configure_file(src/fonts/glyphs_sans.png ${CMAKE_BINARY_DIR}/fonts/glyphs_sans.png COPYONLY)
     file(COPY sounds DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY images DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY "The House" "The House 2" DESTINATION ${CMAKE_BINARY_DIR})
@@ -66,7 +66,7 @@ endif()
 
 if(NOT APPLE)
     install(TARGETS glider RUNTIME DESTINATION .)
-    install(DIRECTORY fonts images sounds DESTINATION .)
+    install(DIRECTORY src/fonts images sounds DESTINATION .)
     install(FILES "The House" "The House 2" DESTINATION .)
 endif()
 
@@ -75,33 +75,33 @@ if(WIN32)
 endif()
 
 add_executable(glidereditor
-    editor/main_editor.cpp
-    editor/Editor.cpp
-    editor/Editor.h
-    FileBrowser.cpp
-    FileBrowser.h
-    editor/ProcessLauncher.cpp
-    editor/ProcessLauncher.h
-    HouseWriter.cpp
-    HouseWriter.h
-    HouseReader.cpp
-    HouseReader.h
-    HouseData.h
-    ObjectType.h
-    Renderer.cpp
-    Renderer.h
-    Resources.cpp
-    Resources.h
-    GameState.h
-    PlayerState.h
-    Rect.h
-    Constants.h
-    Colors.h
-    WindowGeometry.h
-    GameOverState.h
-    Random.h
+    src/editor/main_editor.cpp
+    src/editor/Editor.cpp
+    src/editor/Editor.h
+    src/FileBrowser.cpp
+    src/FileBrowser.h
+    src/editor/ProcessLauncher.cpp
+    src/editor/ProcessLauncher.h
+    src/HouseWriter.cpp
+    src/HouseWriter.h
+    src/HouseReader.cpp
+    src/HouseReader.h
+    src/HouseData.h
+    src/ObjectType.h
+    src/Renderer.cpp
+    src/Renderer.h
+    src/Resources.cpp
+    src/Resources.h
+    src/GameState.h
+    src/PlayerState.h
+    src/Rect.h
+    src/Constants.h
+    src/Colors.h
+    src/WindowGeometry.h
+    src/GameOverState.h
+    src/Random.h
 )
-target_include_directories(glidereditor PRIVATE ${CMAKE_SOURCE_DIR})
+target_include_directories(glidereditor PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(glidereditor PRIVATE
     $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
     $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
@@ -133,7 +133,7 @@ if(APPLE)
             "${CMAKE_SOURCE_DIR}/images"
             "$<TARGET_BUNDLE_CONTENT_DIR:glider>/Resources/images"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_SOURCE_DIR}/fonts"
+            "${CMAKE_SOURCE_DIR}/src/fonts"
             "$<TARGET_BUNDLE_CONTENT_DIR:glider>/Resources/fonts"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/sounds"
@@ -166,7 +166,7 @@ if(APPLE)
             "${CMAKE_SOURCE_DIR}/images"
             "$<TARGET_BUNDLE_CONTENT_DIR:glidereditor>/Resources/images"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_SOURCE_DIR}/fonts"
+            "${CMAKE_SOURCE_DIR}/src/fonts"
             "$<TARGET_BUNDLE_CONTENT_DIR:glidereditor>/Resources/fonts"
         COMMAND xattr -cr "$<TARGET_BUNDLE_DIR:glidereditor>"
         COMMENT "Populating GliderEditor.app bundle"
