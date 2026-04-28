@@ -34,7 +34,7 @@ void printUsage(const char* programName)
 
 int main(int argc, char* argv[])
 {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux__)
     if (char* base = SDL_GetBasePath())
     {
         std::filesystem::current_path(base);
