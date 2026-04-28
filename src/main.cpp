@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
             renderer.setShowAirflow(prefs.showAirflow);
             updateRendererWindowSize(renderer, window.get());
             Game game(std::move(*houses), renderer, sounds, prefs, startRoom);
-            if (game.run() == GameResult::quit)
+            if (game.run() == GameResult::quit || cliHouseSet)
             {
                 break;
             }

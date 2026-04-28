@@ -306,15 +306,32 @@ void Game::processEvents()
                 renderer_.updateForWindowSize(windowWidth, windowHeight);
             }
             break;
-        case SDL_KEYUP:
-            switch (event.key.keysym.scancode)
+        case SDL_KEYDOWN:
+            if ((phase_ == GamePhase::gameOver || phase_ == GamePhase::endScreen) && !event.key.repeat)
             {
-            case SDL_SCANCODE_ESCAPE:
                 result_ = GameResult::returnToTitle;
                 phase_ = GamePhase::done;
-                break;
-            default:
-                break;
+            }
+            break;
+        case SDL_KEYUP:
+            if (phase_ != GamePhase::gameOver && phase_ != GamePhase::endScreen)
+            {
+                switch (event.key.keysym.scancode)
+                {
+                case SDL_SCANCODE_ESCAPE:
+                    result_ = GameResult::returnToTitle;
+                    phase_ = GamePhase::done;
+                    break;
+                default:
+                    break;
+                }
+            }
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+            if (phase_ == GamePhase::gameOver || phase_ == GamePhase::endScreen)
+            {
+                result_ = GameResult::returnToTitle;
+                phase_ = GamePhase::done;
             }
             break;
         default:
