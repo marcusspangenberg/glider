@@ -28,7 +28,7 @@ constexpr bool rectsOverlap(const Rect& a, const Rect& b)
     return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 }
 
-int32_t simInitialVelocity(uint16_t amount, int32_t limit)
+constexpr int32_t simInitialVelocity(const uint16_t amount, const int32_t limit)
 {
     int32_t simPos = (static_cast<int32_t>(amount) + 32) * 32;
     int32_t simVel = 0;
@@ -46,7 +46,7 @@ Game::Game(std::vector<HouseRec> houses,
     Renderer& renderer,
     SoundResources& sounds,
     const Preferences& prefs,
-    size_t startRoom)
+    const size_t startRoom)
     : houses_(std::move(houses)),
       renderer_(renderer),
       sounds_(sounds),
@@ -198,7 +198,7 @@ void Game::updateGameOverAnim()
     }
     else if (gameOverState_->phase == 1)
     {
-        const int32_t whichLetter = sequenceIndex[gameOverState_->fallLetter];
+        const auto whichLetter = sequenceIndex[gameOverState_->fallLetter];
         gameOverState_->fallX += rng::randomInt(0, gameOverState_->fallIter * 2) - gameOverState_->fallIter;
         gameOverState_->letters.push_back({whichLetter, gameOverState_->fallX, 100 + gameOverState_->fallIter * 8});
         gameOverState_->fallX += 36;
@@ -312,14 +312,6 @@ void Game::processEvents()
             case SDL_SCANCODE_ESCAPE:
                 result_ = GameResult::returnToTitle;
                 phase_ = GamePhase::done;
-                break;
-            case SDL_SCANCODE_1:
-                gameState_.roomIndex
-                    = gameState_.roomIndex == 0 ? houses_[houseIndex_].numberORooms - 1 : gameState_.roomIndex - 1;
-                break;
-            case SDL_SCANCODE_2:
-                gameState_.roomIndex
-                    = gameState_.roomIndex == houses_[houseIndex_].numberORooms - 1 ? 0 : gameState_.roomIndex + 1;
                 break;
             default:
                 break;
