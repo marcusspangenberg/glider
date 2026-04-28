@@ -103,18 +103,20 @@ jobs:
       - name: Zip artifact (macOS)
         if: runner.os == 'macOS'
         run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then VERSION="${GITHUB_REF_NAME#v}"; else VERSION="0.0.0"; fi
           cd artifact
-          ditto -c -k --sequesterRsrc . ../glider-macos.zip
+          ditto -c -k --sequesterRsrc . ../glider-macos-${VERSION}.zip
           cd ..
-          mv glider-macos.zip artifact/
+          mv glider-macos-${VERSION}.zip artifact/
 
       - name: Archive artifact (Linux)
         if: runner.os == 'Linux'
         run: |
-          mv artifact glider-linux
-          tar -czf glider-linux.tar.gz glider-linux/
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then VERSION="${GITHUB_REF_NAME#v}"; else VERSION="0.0.0"; fi
+          mv artifact glider-ubuntu24-${VERSION}
+          tar -czf glider-ubuntu24-${VERSION}.tar.gz glider-ubuntu24-${VERSION}/
           mkdir artifact
-          mv glider-linux.tar.gz artifact/
+          mv glider-ubuntu24-${VERSION}.tar.gz artifact/
 
       - name: Create deb package (Linux)
         if: runner.os == 'Linux'
@@ -128,7 +130,7 @@ jobs:
           mkdir -p "$DEB_DIR/DEBIAN"
           mkdir -p "$DEB_DIR/opt/glider"
           mkdir -p "$DEB_DIR/usr/local/bin"
-          cp -r glider-linux/. "$DEB_DIR/opt/glider/"
+          cp -r glider-ubuntu24-${VERSION}/. "$DEB_DIR/opt/glider/"
           cat > "$DEB_DIR/DEBIAN/control" << EOF
           Package: glider
           Version: $VERSION
@@ -140,29 +142,30 @@ jobs:
           EOF
           ln -s /opt/glider/glider "$DEB_DIR/usr/local/bin/glider"
           ln -s /opt/glider/glidereditor "$DEB_DIR/usr/local/bin/glidereditor"
-          dpkg-deb --build --root-owner-group "$DEB_DIR" artifact/glider-linux.deb
+          dpkg-deb --build --root-owner-group "$DEB_DIR" artifact/glider-ubuntu24-${VERSION}.deb
 
       - name: Zip artifact (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          if ($env:GITHUB_REF_TYPE -eq "tag") { $VERSION = $env:GITHUB_REF_NAME -replace '^v', '' } else { $VERSION = "0.0.0" }
           cd artifact
-          Compress-Archive -Path * -DestinationPath ..\glider-windows.zip
+          Compress-Archive -Path * -DestinationPath "..\glider-win-$VERSION.zip"
           cd ..
-          Move-Item glider-windows.zip artifact\
+          Move-Item "glider-win-$VERSION.zip" artifact\
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: glider-${{ matrix.name }}
-          path: artifact/glider-${{ matrix.name }}${{ runner.os == 'Linux' && '.tar.gz' || '.zip' }}
+          path: artifact/glider-*${{ runner.os == 'Linux' && '.tar.gz' || '.zip' }}
 
       - name: Upload deb artifact (Linux)
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: glider-linux-deb
-          path: artifact/glider-linux.deb
+          name: glider-ubuntu24-deb
+          path: artifact/glider-ubuntu24-*.deb
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -181,7 +184,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/glider-macos.zip
-            artifacts/glider-linux.tar.gz
-            artifacts/glider-linux.deb
-            artifacts/glider-windows.zip
+            artifacts/glider-macos-*.zip
+            artifacts/glider-ubuntu24-*.tar.gz
+            artifacts/glider-ubuntu24-*.deb
+            artifacts/glider-win-*.zip
