@@ -40,6 +40,7 @@ private:
     bool showAboutDialog_ = false;
     bool showPrefsDialog_ = false;
     bool prefsAirflow_ = false;
+    bool prefsMusicEnabled_ = true;
     SDL_Scancode prefsKeyLeft_ = SDL_SCANCODE_LEFT;
     SDL_Scancode prefsKeyRight_ = SDL_SCANCODE_RIGHT;
     SDL_Scancode prefsKeyThrust_ = SDL_SCANCODE_UP;

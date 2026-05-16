@@ -83,6 +83,10 @@ Preferences Preferences::load()
         {
             prefs.showAirflow = (value == "1");
         }
+        else if (key == "music")
+        {
+            prefs.musicEnabled = (value != "0");
+        }
         else if (key == "keyLeft")
         {
             const auto sc = std::stoi(value);
@@ -137,8 +141,9 @@ void Preferences::save() const
     char buf[256];
     const auto length = std::snprintf(buf,
         sizeof(buf),
-        "airflow=%d\nkeyLeft=%d\nkeyRight=%d\nkeyThrust=%d\nkeyFireBand=%d\n",
+        "airflow=%d\nmusic=%d\nkeyLeft=%d\nkeyRight=%d\nkeyThrust=%d\nkeyFireBand=%d\n",
         showAirflow ? 1 : 0,
+        musicEnabled ? 1 : 0,
         static_cast<int32_t>(keyLeft),
         static_cast<int32_t>(keyRight),
         static_cast<int32_t>(keyThrust),

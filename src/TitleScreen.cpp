@@ -124,6 +124,7 @@ void TitleScreen::drawUI()
             {
                 showPrefsDialog_ = true;
                 prefsAirflow_ = prefs_.showAirflow;
+                prefsMusicEnabled_ = prefs_.musicEnabled;
                 prefsKeyLeft_ = prefs_.keyLeft;
                 prefsKeyRight_ = prefs_.keyRight;
                 prefsKeyThrust_ = prefs_.keyThrust;
@@ -155,6 +156,7 @@ void TitleScreen::drawUI()
     if (ImGui::BeginPopupModal("Preferences", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Checkbox("Show air flow", &prefsAirflow_);
+        ImGui::Checkbox("Enable music", &prefsMusicEnabled_);
 
         ImGui::Spacing();
         ImGui::Separator();
@@ -188,6 +190,7 @@ void TitleScreen::drawUI()
         if (ImGui::Button("Save", ImVec2(120.0f, 0.0f)))
         {
             prefs_.showAirflow = prefsAirflow_;
+            prefs_.musicEnabled = prefsMusicEnabled_;
             prefs_.keyLeft = prefsKeyLeft_;
             prefs_.keyRight = prefsKeyRight_;
             prefs_.keyThrust = prefsKeyThrust_;

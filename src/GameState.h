@@ -103,6 +103,8 @@ struct GameState
 {
     size_t roomIndex = 0;
     uint32_t animTick = 0;
+    int32_t bassLoop = 0;
+    int32_t bassInterval = 46;
     std::unordered_map<ObjectKey, WindowState, ObjectKeyHash> windowStates;
     std::unordered_map<ObjectKey, OutletState, ObjectKeyHash> outletStates;
     std::unordered_map<ObjectKey, DripState, ObjectKeyHash> dripStates;

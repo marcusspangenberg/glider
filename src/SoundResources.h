@@ -43,12 +43,22 @@ public:
         bass = 30,
     };
 
+    enum class Channel : int32_t
+    {
+        soundEffect = 0,
+        music = 1,
+    };
+
     explicit SoundResources(std::string_view directoryName);
     ~SoundResources();
 
-    void play(Sound sound) const;
+    void play(Sound sound, Channel = Channel::soundEffect) const;
     void playTimed(Sound sound, std::chrono::milliseconds duration) const;
 
 private:
+    static constexpr int32_t effectsGroup = 1;
     std::unordered_map<Sound, Mix_Chunk*> sounds_;
+    bool opened_ = false;
+
+    static int32_t getEffectChannelIndex();
 };

@@ -54,6 +54,7 @@ private:
     size_t houseIndex_ = 0;
     Renderer& renderer_;
     SoundResources& sounds_;
+    bool musicEnabled_ = true;
     SDL_Scancode keyLeft_ = SDL_SCANCODE_LEFT;
     SDL_Scancode keyRight_ = SDL_SCANCODE_RIGHT;
     SDL_Scancode keyThrust_ = SDL_SCANCODE_UP;

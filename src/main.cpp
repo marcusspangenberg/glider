@@ -45,30 +45,6 @@ void printUsage(const char* programName)
 using SdlWindow = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
 using SdlRenderer = std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)>;
 
-struct SdlAudio
-{
-    SdlAudio()
-    {
-        if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0)
-        {
-            std::fprintf(stderr, "SdlAudio: Mix_OpenAudio failed: %s\n", Mix_GetError());
-            return;
-        }
-        Mix_AllocateChannels(16);
-        opened_ = true;
-    }
-
-    ~SdlAudio()
-    {
-        if (opened_)
-        {
-            Mix_CloseAudio();
-        }
-    }
-
-    bool opened_ = false;
-};
-
 struct SdlImage
 {
     SdlImage()
@@ -212,7 +188,6 @@ int main(int argc, char* argv[])
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
     SdlImage sdlImage;
-    SdlAudio sdlAudio;
 
     constexpr uint32_t windowFlags = SDL_WINDOW_MAXIMIZED | SDL_WINDOW_RESIZABLE;
     static constexpr SDL_Rect screenRect = {0, 0, 512, 342};

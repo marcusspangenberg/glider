@@ -22,6 +22,9 @@ namespace
 {
 
 constexpr int32_t bonusTimeToBeat = 256;
+constexpr int32_t bassFract = 8;
+constexpr int32_t minBassLoop = 14;
+constexpr int32_t initialBassInterval = bonusTimeToBeat / bassFract + minBassLoop;
 
 constexpr bool rectsOverlap(const Rect& a, const Rect& b)
 {
@@ -50,6 +53,7 @@ Game::Game(std::vector<HouseRec> houses,
     : houses_(std::move(houses)),
       renderer_(renderer),
       sounds_(sounds),
+      musicEnabled_(prefs.musicEnabled),
       keyLeft_(prefs.keyLeft),
       keyRight_(prefs.keyRight),
       keyThrust_(prefs.keyThrust),
@@ -61,6 +65,10 @@ Game::Game(std::vector<HouseRec> houses,
 GameResult Game::run()
 {
     SDL_CaptureMouse(SDL_FALSE);
+    if (musicEnabled_)
+    {
+        sounds_.play(SoundResources::Sound::musicBite, SoundResources::Channel::music);
+    }
 
     while (phase_ != GamePhase::done)
     {
@@ -112,7 +120,20 @@ GameResult Game::run()
                 ++gameState_.animTick;
 
                 bool roomTransition = false;
+                const auto prevRoomIndex = gameState_.roomIndex;
+                const auto prevHouseIndex = houseIndex_;
                 ++playerProgress_.loopsInRoom;
+                ++gameState_.bassLoop;
+                if (gameState_.bassLoop >= gameState_.bassInterval)
+                {
+                    gameState_.bassLoop = 0;
+                    if (musicEnabled_)
+                    {
+                        sounds_.play(SoundResources::Sound::bass);
+                    }
+                    const auto newInterval = (bonusTimeToBeat - playerProgress_.loopsInRoom) / bassFract + minBassLoop;
+                    gameState_.bassInterval = std::max(newInterval, minBassLoop);
+                }
                 if (timeBonusOverlay_.ticksRemaining > 0)
                 {
                     --timeBonusOverlay_.ticksRemaining;
@@ -143,6 +164,16 @@ GameResult Game::run()
 
                 if (roomTransition)
                 {
+                    const bool roomChanged = gameState_.roomIndex != prevRoomIndex || houseIndex_ != prevHouseIndex;
+                    if (roomChanged && phase_ == GamePhase::playing)
+                    {
+                        if (musicEnabled_)
+                        {
+                            sounds_.play(SoundResources::Sound::musicBite, SoundResources::Channel::music);
+                        }
+                        gameState_.bassLoop = 0;
+                        gameState_.bassInterval = initialBassInterval;
+                    }
                     accumulator_ = 0ns;
                     snapPrevPositions();
                     break;

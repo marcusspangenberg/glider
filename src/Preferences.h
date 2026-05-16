@@ -5,6 +5,7 @@
 struct Preferences
 {
     bool showAirflow = false;
+    bool musicEnabled = true;
     SDL_Scancode keyLeft = SDL_SCANCODE_LEFT;
     SDL_Scancode keyRight = SDL_SCANCODE_RIGHT;
     SDL_Scancode keyThrust = SDL_SCANCODE_UP;

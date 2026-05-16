@@ -46,13 +46,15 @@ const std::unordered_map<SoundResources::Sound, std::string_view> soundFiles = {
 
 SoundResources::SoundResources(std::string_view directoryName)
 {
-    int32_t frequency = 0;
-    uint16_t format = 0;
-    int32_t channels = 0;
-    if (Mix_QuerySpec(&frequency, &format, &channels) == 0)
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0)
     {
+        std::fprintf(stderr, "SoundResources: Mix_OpenAudio failed: %s\n", Mix_GetError());
         return;
     }
+    const auto allocated_channels = Mix_AllocateChannels(8);
+    Mix_GroupChannels(1, allocated_channels - 1, effectsGroup);
+    opened_ = true;
+
     for (const auto& [soundId, fileName] : soundFiles)
     {
         std::string path;
@@ -72,24 +74,46 @@ SoundResources::SoundResources(std::string_view directoryName)
 
 SoundResources::~SoundResources()
 {
+    if (!opened_)
+    {
+        return;
+    }
+
     for (const auto& chunk : sounds_ | std::views::values)
     {
         Mix_FreeChunk(chunk);
     }
+    Mix_CloseAudio();
 }
 
-void SoundResources::play(const Sound sound) const
+void SoundResources::play(const Sound sound, const Channel channel) const
 {
+    if (!opened_)
+    {
+        return;
+    }
     if (const auto it = sounds_.find(sound); it != sounds_.end())
     {
-        Mix_PlayChannel(-1, it->second, 0);
+        const auto channelIndex = channel == Channel::soundEffect ? getEffectChannelIndex() : 0;
+        Mix_PlayChannel(channelIndex, it->second, 0);
     }
 }
 
 void SoundResources::playTimed(const Sound sound, const std::chrono::milliseconds duration) const
 {
+    if (!opened_)
+    {
+        return;
+    }
     if (const auto it = sounds_.find(sound); it != sounds_.end())
     {
-        Mix_PlayChannelTimed(-1, it->second, -1, static_cast<int32_t>(duration.count()));
+        const auto channelIndex = getEffectChannelIndex();
+        Mix_PlayChannelTimed(channelIndex, it->second, -1, static_cast<int32_t>(duration.count()));
     }
+}
+
+int32_t SoundResources::getEffectChannelIndex()
+{
+    const auto channelIndex = Mix_GroupAvailable(effectsGroup);
+    return channelIndex == -1 ? Mix_GroupOldest(effectsGroup) : channelIndex;
 }
