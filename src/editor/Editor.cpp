@@ -761,6 +761,63 @@ void Editor::drawRoomListPanel(const float menuBarHeight, const float windowHeig
                 }
             }
 
+            ImGui::Separator();
+            ImGui::TextDisabled("Drag tiles onto the room preview to place:");
+
+            {
+                auto* backgroundTexture = resources_.getTexture(room.backPictID);
+                int32_t textureWidth = 0;
+                int32_t textureHeight = 0;
+                SDL_QueryTexture(backgroundTexture, nullptr, nullptr, &textureWidth, &textureHeight);
+                if (textureWidth > 0 && textureHeight > 0)
+                {
+                    const float availWidth = ImGui::GetContentRegionAvail().x;
+                    const float tileDisplayWidth = availWidth / 8.0f;
+                    const float tileDisplayHeight = tileDisplayWidth * static_cast<float>(textureHeight) / 64.0f;
+
+                    for (int32_t i = 0; i < 8; ++i)
+                    {
+                        const bool isLast = i == 7;
+                        ImGui::PushID(i);
+                        ImGui::InvisibleButton("##minitile", ImVec2(tileDisplayWidth, tileDisplayHeight));
+
+                        const auto buttonMin = ImGui::GetItemRectMin();
+                        const auto buttonMax = ImGui::GetItemRectMax();
+                        const float uvX0 = (static_cast<float>(i) * 64.0f) / static_cast<float>(textureWidth);
+                        const float uvX1 = uvX0 + 64.0f / static_cast<float>(textureWidth);
+                        ImGui::GetWindowDrawList()->AddImage(reinterpret_cast<ImTextureID>(backgroundTexture),
+                            buttonMin,
+                            buttonMax,
+                            ImVec2(uvX0, 0.0f),
+                            ImVec2(uvX1, 1.0f));
+
+                        if (!isLast)
+                        {
+                            ImGui::GetWindowDrawList()->AddLine(ImVec2(buttonMax.x, buttonMin.y),
+                                buttonMax,
+                                IM_COL32(255, 255, 255, 80),
+                                1.0f);
+                        }
+
+                        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                        {
+                            ImGui::SetDragDropPayload("GLIDER_TILE_SET", &i, sizeof(int32_t));
+                            ImGui::Image(reinterpret_cast<ImTextureID>(backgroundTexture),
+                                ImVec2(tileDisplayWidth * 2.0f, tileDisplayHeight * 2.0f),
+                                ImVec2(uvX0, 0.0f),
+                                ImVec2(uvX1, 1.0f));
+                            ImGui::EndDragDropSource();
+                        }
+
+                        if (!isLast)
+                        {
+                            ImGui::SameLine(0.0f, 0.0f);
+                        }
+                        ImGui::PopID();
+                    }
+                }
+            }
+
             {
                 bool leftOpen = room.leftOpen != 0;
                 bool rightOpen = room.rightOpen != 0;
@@ -867,14 +924,14 @@ void Editor::drawCenterPanel(const float menuBarHeight,
     previewScale_ = std::min(availWidth / static_cast<float>(roomWidth), availHeight / static_cast<float>(roomHeight));
     previewScale_ = std::max(previewScale_, 0.5f);
 
-    const float scaledW = static_cast<float>(roomWidth) * previewScale_;
-    const float scaledH = static_cast<float>(roomHeight) * previewScale_;
+    const float scaledWidth = static_cast<float>(roomWidth) * previewScale_;
+    const float scaledHeight = static_cast<float>(roomHeight) * previewScale_;
 
-    const float offsetX = std::max(0.0f, (availWidth - scaledW) * 0.5f);
+    const float offsetX = std::max(0.0f, (availWidth - scaledWidth) * 0.5f);
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offsetX);
 
     previewImageOrigin_ = ImGui::GetCursorScreenPos();
-    ImGui::Image(reinterpret_cast<ImTextureID>(previewTexture_), ImVec2(scaledW, scaledH));
+    ImGui::Image(reinterpret_cast<ImTextureID>(previewTexture_), ImVec2(scaledWidth, scaledHeight));
 
     if (activePaletteTool_ != ObjectType::nullObject && ImGui::IsItemHovered())
     {
@@ -911,6 +968,34 @@ void Editor::drawCenterPanel(const float menuBarHeight,
         {
             dragMode_ = DragMode::none;
         }
+    }
+
+    if (ImGui::BeginDragDropTarget())
+    {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GLIDER_TILE_SET"))
+        {
+            const auto sourceTile = *static_cast<const int32_t*>(payload->Data);
+            const auto mousePos = ImGui::GetMousePos();
+            const float roomX = (mousePos.x - previewImageOrigin_.x) / previewScale_;
+            const auto destColumn = std::clamp(static_cast<int32_t>(roomX / 64.0f), 0, 7);
+            auto& room = house_.theRooms[selectedRoomIndex_];
+            room.tileOrder[destColumn] = static_cast<uint16_t>(sourceTile);
+            dirty_ = true;
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    const ImGuiPayload* activeDrag = ImGui::GetDragDropPayload();
+    if (activeDrag != nullptr && strcmp(activeDrag->DataType, "GLIDER_TILE_SET") == 0 && ImGui::IsItemHovered())
+    {
+        const auto mousePos = ImGui::GetMousePos();
+        const float roomX = (mousePos.x - previewImageOrigin_.x) / previewScale_;
+        const auto hoverColumn = std::clamp(static_cast<int32_t>(roomX / 64.0f), 0, 7);
+        const float columnScreenX = previewImageOrigin_.x + static_cast<float>(hoverColumn) * 64.0f * previewScale_;
+        const float columnScreenW = 64.0f * previewScale_;
+        ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(columnScreenX, previewImageOrigin_.y),
+            ImVec2(columnScreenX + columnScreenW, previewImageOrigin_.y + scaledHeight),
+            IM_COL32(255, 255, 255, 60));
     }
 
     ImGui::End();
